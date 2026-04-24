@@ -1,4 +1,4 @@
-import { sb } from "./supabase-client.js";
+import { sb, insertOwned } from "./supabase-client.js";
 import { $, el, toast, modal, longDate, isoDate, money } from "./util.js";
 
 // =========================================================
@@ -74,7 +74,7 @@ function mediaModal(existing, refresh) {
         };
         if (statusSel.value === "done" && !existing?.finished_at) p.finished_at = isoDate();
         if (existing) await sb.from("media_log").update(p).eq("id", existing.id);
-        else await sb.from("media_log").insert(p);
+        else await insertOwned("media_log", p);
         c(); toast("Saved"); refresh();
       }}
     ].filter(Boolean)
@@ -154,7 +154,7 @@ function gamingModal(existing, refresh) {
           yt_video_url: ytUrlIn.value.trim() || null
         };
         if (existing) await sb.from("gaming_sessions").update(p).eq("id", existing.id);
-        else await sb.from("gaming_sessions").insert(p);
+        else await insertOwned("gaming_sessions", p);
         c(); toast("Saved"); refresh();
       }}
     ].filter(Boolean)
@@ -226,7 +226,7 @@ function editModal(existing, refresh) {
           updated_at: new Date().toISOString()
         };
         if (existing) await sb.from("edit_projects").update(p).eq("id", existing.id);
-        else await sb.from("edit_projects").insert(p);
+        else await insertOwned("edit_projects", p);
         c(); toast("Saved"); refresh();
       }}
     ].filter(Boolean)
@@ -304,7 +304,7 @@ function txModal(existing, refresh) {
           note: noteF.querySelector("input").value.trim() || null
         };
         if (existing) await sb.from("transactions").update(p).eq("id", existing.id);
-        else await sb.from("transactions").insert(p);
+        else await insertOwned("transactions", p);
         c(); toast("Saved"); refresh();
       }}
     ].filter(Boolean)
@@ -386,7 +386,7 @@ function healthModal(existing, refresh) {
           notes: notesIn.value.trim() || null
         };
         if (existing) await sb.from("health_logs").update(p).eq("id", existing.id);
-        else await sb.from("health_logs").upsert(p, { onConflict: "user_id,log_date" });
+        else await insertOwned("health_logs", p);
         c(); toast("Saved"); refresh();
       }}
     ].filter(Boolean)
