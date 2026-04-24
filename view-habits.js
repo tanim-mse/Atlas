@@ -1,4 +1,4 @@
-import { sb } from "./supabase-client.js";
+import { sb, insertOwned } from "./supabase-client.js";
 import { $, el, isoDate, lastNDays, prettyDate, toast, modal } from "./util.js";
 
 const PALETTE = ["#7c5cff","#2ad9ff","#3ddc97","#ffb35a","#ff5fa2","#a78bfa"];
@@ -55,7 +55,7 @@ function habitCard(habit, logs, refresh) {
         if (done) {
           await sb.from("habit_logs").delete().eq("habit_id", habit.id).eq("log_date", iso);
         } else {
-          await sb.from("habit_logs").insert({ habit_id: habit.id, log_date: iso });
+          await insertOwned("habit_logs", { habit_id: habit.id, log_date: iso });
         }
         refresh();
       }
@@ -156,7 +156,7 @@ function addHabitModal(onSaved) {
       { label: "Cancel", onClick: (c) => c() },
       { label: "Create", variant: "btn--primary", onClick: async (close) => {
         if (!name.value.trim()) return;
-        await sb.from("habits").insert({
+        await insertOwned("habits", {
           name: name.value.trim(), icon: selectedIcon, color: selectedColor
         });
         close();
