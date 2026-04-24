@@ -118,6 +118,7 @@ const ROUTES = {
 };
 
 let currentUserRef = null;
+let navigating = false;
 
 function showApp(user) {
   currentUserRef = user;
@@ -142,6 +143,7 @@ function showApp(user) {
   navigate(ROUTES[initial] ? initial : "today");
 
   window.addEventListener("hashchange", () => {
+    if (navigating) return;
     const view = (location.hash || "#today").slice(1);
     if (ROUTES[view]) navigate(view);
   });
@@ -149,7 +151,11 @@ function showApp(user) {
 
 async function navigate(view) {
   if (!ROUTES[view]) return;
+
+  // Set hash without triggering a second navigate via hashchange
+  navigating = true;
   location.hash = view;
+  requestAnimationFrame(() => { navigating = false; });
 
   // Update rail
   document.querySelectorAll(".rail__link[data-view]").forEach(l => {
@@ -165,8 +171,9 @@ async function navigate(view) {
 
   // Render
   const body = document.getElementById("view");
+  body.innerHTML = "";
   body.style.opacity = 0;
-  await sleep(120);
+  await sleep(80);
   try {
     await route.render(body, currentUserRef);
   } catch (err) {
