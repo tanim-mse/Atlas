@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="theme-color" content="#05060a" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter+Tight:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Atmosphere -->
+<div class="aurora">
+  <div class="aurora__layer aurora__layer--1"></div>
+  <div class="aurora__layer aurora__layer--2"></div>
+  <div class="aurora__layer aurora__layer--3"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- Boot screen -->
+<section id="boot" class="boot">
+  <div class="boot__mark">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="0.75"/>
+      <circle cx="32" cy="32" r="18" fill="none" stroke="currentColor" stroke-width="0.75"/>
+      <circle cx="32" cy="32" r="8"  fill="none" stroke="currentColor" stroke-width="0.75"/>
+      <line x1="32" y1="4" x2="32" y2="60" stroke="currentColor" stroke-width="0.5"/>
+      <line x1="4" y1="32" x2="60" y2="32" stroke="currentColor" stroke-width="0.5"/>
+    </svg>
+  </div>
+  <div class="boot__title">ATLAS</div>
+  <div class="boot__sub">a quiet record of a life</div>
+</section>
+
+<!-- Auth -->
+<section id="auth" class="auth hidden">
+  <div class="auth__frame">
+    <div class="auth__eyebrow">restricted</div>
+    <h1 class="auth__title">Welcome back.</h1>
+    <p class="auth__lede">Atlas is private. Identify yourself.</p>
+
+    <div class="auth__tabs">
+      <button class="auth__tab is-active" data-tab="signin">Sign in</button>
+      <button class="auth__tab" data-tab="signup">First time</button>
+    </div>
+
+    <form id="auth-form" class="auth__form" autocomplete="on">
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="auth-email" required autocomplete="email" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="auth-password" required minlength="8" autocomplete="current-password" />
+      </label>
+      <button type="submit" class="btn btn--primary" id="auth-submit">
+        <span class="btn__label">Enter Atlas</span>
+        <span class="btn__shine"></span>
+      </button>
+      <div class="auth__error" id="auth-error"></div>
+    </form>
+
+    <div class="auth__divider"><span>or</span></div>
+
+    <button id="passkey-btn" class="btn btn--ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="11" r="4"/><path d="M12 11h9M17 11v4M21 11v2"/></svg>
+      Sign in with passkey
+    </button>
+
+    <label class="remember">
+      <input type="checkbox" id="remember" checked />
+      <span>Keep me signed in for 30 days on this device</span>
+    </label>
+  </div>
+</section>
+
+<!-- App shell -->
+<main id="app" class="app hidden">
+  <aside class="rail">
+    <div class="rail__brand">
+      <svg viewBox="0 0 32 32" class="rail__mark"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="0.5"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="0.5"/><circle cx="16" cy="16" r="4" fill="none" stroke="currentColor" stroke-width="0.5"/></svg>
+      <span>Atlas</span>
+    </div>
+
+    <nav class="rail__nav">
+      <button class="rail__link is-active" data-view="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span>Today</span>
+      </button>
+      <button class="rail__link" data-view="journal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        <span>Journal</span>
+      </button>
+      <button class="rail__link" data-view="habits">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12l4 4L20 6"/></svg>
+        <span>Habits</span>
+      </button>
+      <button class="rail__link" data-view="mood">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 17l5-6 4 4 4-7 5 9"/></svg>
+        <span>Mood</span>
+      </button>
+      <button class="rail__link" data-view="goals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+        <span>Goals</span>
+      </button>
+      <button class="rail__link" data-view="media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>
+        <span>Media</span>
+      </button>
+      <button class="rail__link" data-view="gaming">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="7" width="18" height="12" rx="3"/><path d="M8 13h.01M12 13h.01M16 13h.01"/></svg>
+        <span>Gaming</span>
+      </button>
+      <button class="rail__link" data-view="edits">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 5v4M17 5v4M7 15l3 2-3 2z"/></svg>
+        <span>Edits</span>
+      </button>
+      <button class="rail__link" data-view="finance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+        <span>Finance</span>
+      </button>
+      <button class="rail__link" data-view="health">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>
+        <span>Health</span>
+      </button>
+    </nav>
+
+    <div class="rail__foot">
+      <button class="rail__link rail__link--muted" id="sign-out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
+        <span>Sign out</span>
+      </button>
+    </div>
+  </aside>
+
+  <section class="stage">
+    <header class="stage__head">
+      <div>
+        <div class="stage__date" id="stage-date"></div>
+        <h1 class="stage__title" id="stage-title">Today</h1>
+      </div>
+      <div class="stage__actions" id="stage-actions"></div>
+    </header>
+
+    <div class="stage__body" id="view"></div>
+  </section>
+</main>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Modal host -->
+<div id="modal-host" class="modal-host hidden" aria-hidden="true">
+  <div class="modal-host__scrim" data-close></div>
+  <div class="modal-host__frame" id="modal-frame"></div>
+</div>
+
+<!-- Supabase UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- App -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
