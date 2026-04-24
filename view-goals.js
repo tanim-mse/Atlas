@@ -1,4 +1,4 @@
-import { sb } from "./supabase-client.js";
+import { sb, insertOwned } from "./supabase-client.js";
 import { $, el, toast, modal, longDate } from "./util.js";
 
 export async function renderGoals(root, user) {
@@ -121,7 +121,7 @@ function goalModal(existing, onSaved) {
     };
     if (existing) payload.status = body._status.value;
     if (existing) await sb.from("goals").update(payload).eq("id", existing.id);
-    else await sb.from("goals").insert(payload);
+    else await insertOwned("goals", payload);
     c(); toast("Saved"); onSaved();
   }});
 
