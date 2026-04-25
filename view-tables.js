@@ -1,8 +1,8 @@
 import { sb, insertOwned } from "./supabase-client.js";
-import { $, el, toast, modal, longDate, isoDate, money } from "./util.js";
+import { el, toast, modal, longDate, isoDate, money } from "./util.js";
 
 // =========================================================
-// MEDIA (reading + watching)
+// MEDIA
 // =========================================================
 export async function renderMedia(root) {
   root.innerHTML = "";
@@ -15,12 +15,10 @@ export async function renderMedia(root) {
 
   const card = el("article", { class: "card table-card" });
   const table = el("table", { class: "table" });
-  table.innerHTML = `
-    <thead><tr><th>Title</th><th>Kind</th><th>Status</th><th>Rating</th><th>Finished</th></tr></thead>
-  `;
+  table.innerHTML = `<thead><tr><th>Title</th><th>Kind</th><th>Status</th><th>Rating</th><th>Finished</th></tr></thead>`;
   const tbody = el("tbody");
   data.forEach(m => {
-    const tr = el("tr", { style: { cursor: "pointer" }, onClick: () => mediaModal(m, () => renderMedia(root)) });
+    const tr = el("tr", { onClick: () => mediaModal(m, () => renderMedia(root)) });
     tr.appendChild(el("td", {},
       el("div", { style: { fontFamily: "var(--serif)", fontSize: "16px" } }, m.title),
       m.creator ? el("div", { style: { fontSize: "11px", color: "var(--ink-3)" } }, m.creator) : null
@@ -93,13 +91,12 @@ export async function renderGaming(root) {
   const { data } = await sb.from("gaming_sessions").select("*").order("session_date", { ascending: false }).order("created_at", { ascending: false });
   if (!data?.length) return root.appendChild(empty("No sessions yet", "Track what you played, what you captured."));
 
-  // Summary cards
   const totalMins = data.reduce((s, x) => s + (x.duration_minutes || 0), 0);
   const ytCount = data.filter(x => x.recorded_for_yt).length;
   const summary = el("div", { class: "grid grid--3", style: { marginBottom: "20px" } });
-  summary.appendChild(statCard("Total time", `${Math.floor(totalMins/60)}h ${totalMins%60}m`, "var(--a-violet)"));
-  summary.appendChild(statCard("Sessions", String(data.length), "var(--a-cyan)"));
-  summary.appendChild(statCard("Recorded for YT", String(ytCount), "var(--a-rose)"));
+  summary.appendChild(statCard("Total time", `${Math.floor(totalMins/60)}h ${totalMins%60}m`, "var(--grad-aurora)", "card--violet"));
+  summary.appendChild(statCard("Sessions", String(data.length), "var(--grad-ocean)", "card--cyan"));
+  summary.appendChild(statCard("Recorded for YT", String(ytCount), "var(--grad-ember)", "card--rose"));
   root.appendChild(summary);
 
   const card = el("article", { class: "card table-card" });
@@ -107,7 +104,7 @@ export async function renderGaming(root) {
   table.innerHTML = `<thead><tr><th>Date</th><th>Game</th><th>Duration</th><th>Highlight</th><th>YT</th></tr></thead>`;
   const tbody = el("tbody");
   data.forEach(s => {
-    const tr = el("tr", { style: { cursor: "pointer" }, onClick: () => gamingModal(s, () => renderGaming(root)) });
+    const tr = el("tr", { onClick: () => gamingModal(s, () => renderGaming(root)) });
     tr.appendChild(el("td", { style: { fontFamily: "var(--mono)", fontSize: "12px" } }, longDate(s.session_date)));
     tr.appendChild(el("td", { style: { fontFamily: "var(--serif)", fontSize: "15px" } }, s.game));
     tr.appendChild(el("td", {}, s.duration_minutes ? `${Math.floor(s.duration_minutes/60)}h ${s.duration_minutes%60}m` : "—"));
@@ -174,8 +171,9 @@ export async function renderEdits(root) {
   if (!data?.length) return root.appendChild(empty("No edit projects", "When you pick editing back up, track it here."));
 
   const grid = el("div", { class: "grid grid--2" });
-  data.forEach(p => {
-    const card = el("article", { class: "card", style: { cursor: "pointer" }, onClick: () => editModal(p, () => renderEdits(root)) });
+  const accents = ["card--violet", "card--cyan", "card--rose", "card--amber", "card--jade", "card--lilac"];
+  data.forEach((p, i) => {
+    const card = el("article", { class: `card card--clickable ${accents[i % accents.length]}`, onClick: () => editModal(p, () => renderEdits(root)) });
     card.appendChild(el("div", { class: "card__eyebrow" }, p.software || "project"));
     card.appendChild(el("h3", { class: "card__title" }, p.title));
     const meta = el("div", { style: { display: "flex", gap: "10px", marginTop: "14px", alignItems: "center" } });
@@ -244,13 +242,12 @@ export async function renderFinance(root) {
 
   const { data } = await sb.from("transactions").select("*").order("tx_date", { ascending: false }).order("created_at", { ascending: false });
 
-  // Summary
   const income = (data || []).filter(t => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
   const expense = (data || []).filter(t => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
   const summary = el("div", { class: "grid grid--3", style: { marginBottom: "20px" } });
-  summary.appendChild(statCard("Income", money(income), "var(--a-jade)"));
-  summary.appendChild(statCard("Expenses", money(expense), "var(--a-rose)"));
-  summary.appendChild(statCard("Net", money(income - expense), income - expense >= 0 ? "var(--a-cyan)" : "var(--a-amber)"));
+  summary.appendChild(statCard("Income", money(income), "var(--grad-ocean)", "card--jade"));
+  summary.appendChild(statCard("Expenses", money(expense), "var(--grad-ember)", "card--rose"));
+  summary.appendChild(statCard("Net", money(income - expense), income - expense >= 0 ? "var(--grad-aurora)" : "var(--grad-ember)", income - expense >= 0 ? "card--cyan" : "card--amber"));
   root.appendChild(summary);
 
   if (!data?.length) return root.appendChild(empty("No transactions", "Log income, expenses, categories."));
@@ -260,7 +257,7 @@ export async function renderFinance(root) {
   table.innerHTML = `<thead><tr><th>Date</th><th>Category</th><th>Note</th><th style="text-align:right">Amount</th></tr></thead>`;
   const tbody = el("tbody");
   data.forEach(t => {
-    const tr = el("tr", { style: { cursor: "pointer" }, onClick: () => txModal(t, () => renderFinance(root)) });
+    const tr = el("tr", { onClick: () => txModal(t, () => renderFinance(root)) });
     tr.appendChild(el("td", { style: { fontFamily: "var(--mono)", fontSize: "12px", color: "var(--ink-3)" } }, longDate(t.tx_date)));
     tr.appendChild(el("td", {}, t.category || "—"));
     tr.appendChild(el("td", { style: { color: "var(--ink-2)" } }, t.note || "—"));
@@ -324,7 +321,6 @@ export async function renderHealth(root) {
 
   if (!data?.length) return root.appendChild(empty("No health logs", "Track sleep, water, movement."));
 
-  // Summary: last 7 days averages
   const last7 = data.slice(0, 7);
   const avg = (key) => {
     const vals = last7.map(d => d[key]).filter(v => v != null);
@@ -332,10 +328,10 @@ export async function renderHealth(root) {
     return (vals.reduce((a,b) => a + Number(b), 0) / vals.length).toFixed(1);
   };
   const summary = el("div", { class: "grid grid--4", style: { marginBottom: "20px" } });
-  summary.appendChild(statCard("Sleep (7d avg)", `${avg("sleep_hours")}h`, "var(--a-violet)"));
-  summary.appendChild(statCard("Water (7d avg)", `${avg("water_ml")}ml`, "var(--a-cyan)"));
-  summary.appendChild(statCard("Move (7d avg)", `${avg("workout_minutes")}m`, "var(--a-jade)"));
-  summary.appendChild(statCard("Weight", data[0].weight_kg ? `${data[0].weight_kg}kg` : "—", "var(--a-amber)"));
+  summary.appendChild(statCard("Sleep (7d avg)", `${avg("sleep_hours")}h`, "var(--grad-cosmic)", "card--violet"));
+  summary.appendChild(statCard("Water (7d avg)", `${avg("water_ml")}ml`, "var(--grad-ocean)", "card--cyan"));
+  summary.appendChild(statCard("Move (7d avg)", `${avg("workout_minutes")}m`, "var(--grad-aurora)", "card--jade"));
+  summary.appendChild(statCard("Weight", data[0].weight_kg ? `${data[0].weight_kg}kg` : "—", "var(--grad-ember)", "card--amber"));
   root.appendChild(summary);
 
   const card = el("article", { class: "card table-card" });
@@ -343,7 +339,7 @@ export async function renderHealth(root) {
   table.innerHTML = `<thead><tr><th>Date</th><th>Sleep</th><th>Water</th><th>Move</th><th>Weight</th><th>Notes</th></tr></thead>`;
   const tbody = el("tbody");
   data.forEach(h => {
-    const tr = el("tr", { style: { cursor: "pointer" }, onClick: () => healthModal(h, () => renderHealth(root)) });
+    const tr = el("tr", { onClick: () => healthModal(h, () => renderHealth(root)) });
     tr.appendChild(el("td", { style: { fontFamily: "var(--mono)", fontSize: "12px" } }, longDate(h.log_date)));
     tr.appendChild(el("td", {}, h.sleep_hours ? `${h.sleep_hours}h` : "—"));
     tr.appendChild(el("td", {}, h.water_ml ? `${h.water_ml}ml` : "—"));
@@ -403,10 +399,10 @@ function field(label, input) {
   return f;
 }
 
-function statCard(label, value, color) {
-  const c = el("article", { class: "card" });
+function statCard(label, value, gradient, accentClass = "") {
+  const c = el("article", { class: `card ${accentClass}` });
   c.appendChild(el("div", { class: "card__eyebrow" }, label));
-  c.appendChild(el("div", { class: "card__big", style: color ? { background: `linear-gradient(120deg, ${color}, ${color})`, "-webkit-background-clip": "text", "backgroundClip": "text" } : {} }, value));
+  c.appendChild(el("div", { class: "card__big", style: { "--card-grad": gradient } }, value));
   return c;
 }
 
