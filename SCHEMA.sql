@@ -3,7 +3,6 @@
 -- Row-Level Security: only the owner (auth.uid()) reads/writes.
 -- =========================================================
 
--- Enable UUID helpers
 create extension if not exists "pgcrypto";
 
 -- -------- JOURNAL --------
@@ -64,7 +63,7 @@ create table if not exists milestones (
   done_at timestamptz
 );
 
--- -------- MEDIA LOG (reading + watching) --------
+-- -------- MEDIA LOG --------
 create table if not exists media_log (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -134,7 +133,7 @@ create table if not exists health_logs (
 );
 
 -- =========================================================
--- ROW-LEVEL SECURITY — lock everything to owner
+-- ROW-LEVEL SECURITY
 -- =========================================================
 alter table journal_entries enable row level security;
 alter table habits enable row level security;
@@ -148,8 +147,7 @@ alter table transactions enable row level security;
 alter table health_logs enable row level security;
 
 do $$
-declare
-  t text;
+declare t text;
 begin
   for t in select unnest(array[
     'journal_entries','habits','habit_logs','goals','milestones',
@@ -164,10 +162,6 @@ begin
   end loop;
 end $$;
 
--- =========================================================
--- AUTO user_id trigger — sets user_id = auth.uid() on every insert
--- so client code doesn't need to pass it explicitly.
--- =========================================================
 create or replace function public.set_user_id()
 returns trigger language plpgsql security definer as $$
 begin
@@ -177,8 +171,7 @@ end;
 $$;
 
 do $$
-declare
-  t text;
+declare t text;
 begin
   for t in select unnest(array[
     'journal_entries','habits','habit_logs','goals','milestones',
@@ -193,10 +186,6 @@ begin
   end loop;
 end $$;
 
--- Pure-client WebAuthn would need a verification server;
--- we use Supabase's built-in MFA enrollment instead at runtime
--- and keep this table for credential metadata only.
--- =========================================================
 create table if not exists passkeys (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
