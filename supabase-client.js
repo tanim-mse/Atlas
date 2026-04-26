@@ -9,8 +9,6 @@ export const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPAB
   }
 });
 
-// Wraps sb.from(table).insert() to always include user_id from current session.
-// Usage: await insertOwned("habits", { name: "..." })
 export async function insertOwned(table, payload) {
   const { data: { user } } = await sb.auth.getUser();
   const uid = user?.id;
@@ -48,7 +46,6 @@ export async function currentUser() {
   return data?.user ?? null;
 }
 
-// ---------- Passkey (WebAuthn via Supabase MFA) ----------
 export async function hasPasskey() {
   const { data, error } = await sb.auth.mfa.listFactors();
   if (error) return false;
@@ -62,11 +59,7 @@ export async function enrollPasskey(label = "This device") {
   const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: data.id });
   if (chErr) throw chErr;
   const cred = await navigator.credentials.create({ publicKey: ch.credentialOptions.publicKey });
-  const { error: vErr } = await sb.auth.mfa.verify({
-    factorId: data.id,
-    challengeId: ch.id,
-    credential: cred
-  });
+  const { error: vErr } = await sb.auth.mfa.verify({ factorId: data.id, challengeId: ch.id, credential: cred });
   if (vErr) throw vErr;
   return true;
 }
@@ -81,11 +74,7 @@ export async function signInWithPasskey() {
   const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: factor.id });
   if (chErr) throw chErr;
   const cred = await navigator.credentials.get({ publicKey: ch.credentialOptions.publicKey });
-  const { error: vErr } = await sb.auth.mfa.verify({
-    factorId: factor.id,
-    challengeId: ch.id,
-    credential: cred
-  });
+  const { error: vErr } = await sb.auth.mfa.verify({ factorId: factor.id, challengeId: ch.id, credential: cred });
   if (vErr) throw vErr;
   return true;
 }
