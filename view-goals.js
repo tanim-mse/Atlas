@@ -1,5 +1,5 @@
 import { sb, insertOwned } from "./supabase-client.js";
-import { $, el, toast, modal, longDate } from "./util.js";
+import { el, toast, modal, longDate, REDUCED } from "./util.js";
 
 export async function renderGoals(root, user) {
   root.innerHTML = "";
@@ -21,14 +21,27 @@ export async function renderGoals(root, user) {
   const active = goals.filter(g => g.status === "active");
   const other = goals.filter(g => g.status !== "active");
 
+  const allCards = [];
   if (active.length) {
     root.appendChild(el("div", { class: "card__eyebrow", style: { marginBottom: "10px" } }, "Active"));
-    active.forEach(g => root.appendChild(goalCard(g, () => renderGoals(root, user))));
+    active.forEach(g => { const c = goalCard(g, () => renderGoals(root, user)); root.appendChild(c); allCards.push(c); });
   }
   if (other.length) {
     root.appendChild(el("div", { class: "card__eyebrow", style: { margin: "24px 0 10px" } }, "Archive"));
-    other.forEach(g => root.appendChild(goalCard(g, () => renderGoals(root, user))));
+    other.forEach(g => { const c = goalCard(g, () => renderGoals(root, user)); root.appendChild(c); allCards.push(c); });
   }
+
+  if (window.gsap && !REDUCED) {
+    gsap.from(allCards, { y: 16, opacity: 0, duration: 0.6, stagger: 0.05, ease: "power3.out" });
+  }
+
+  // Animate progress bars after a tick
+  requestAnimationFrame(() => {
+    root.querySelectorAll(".goal__bar-fill").forEach(b => {
+      const target = b.dataset.progress;
+      setTimeout(() => { b.style.width = target + "%"; }, 200);
+    });
+  });
 }
 
 function goalCard(g, refresh) {
@@ -41,18 +54,13 @@ function goalCard(g, refresh) {
 
   const right = el("div", { style: { display: "flex", gap: "8px", alignItems: "center" } });
   right.appendChild(el("span", { class: `status-pill ${g.status}` }, g.status));
-  const edit = el("button", {
-    class: "btn btn--sm btn--subtle",
-    onClick: () => goalModal(g, refresh)
-  }, "Edit");
-  right.appendChild(edit);
+  right.appendChild(el("button", { class: "btn btn--sm btn--subtle", onClick: () => goalModal(g, refresh) }, "Edit"));
   head.appendChild(right);
-
   card.appendChild(head);
 
-  // progress bar
   const bar = el("div", { class: "goal__bar" });
-  bar.appendChild(el("div", { class: "goal__bar-fill", style: { width: g.progress + "%" } }));
+  const fill = el("div", { class: "goal__bar-fill", "data-progress": String(g.progress), style: { width: "0%" } });
+  bar.appendChild(fill);
   card.appendChild(bar);
 
   const meta = el("div", { class: "goal__meta" });
@@ -104,9 +112,7 @@ function goalModal(existing, onSaved) {
     body._status = statusIn;
   }
 
-  const actions = [
-    { label: "Cancel", onClick: (c) => c() }
-  ];
+  const actions = [{ label: "Cancel", onClick: (c) => c() }];
   if (existing) actions.push({ label: "Delete", variant: "btn--danger", onClick: async (c) => {
     await sb.from("goals").delete().eq("id", existing.id);
     c(); toast("Deleted"); onSaved();
@@ -125,11 +131,7 @@ function goalModal(existing, onSaved) {
     c(); toast("Saved"); onSaved();
   }});
 
-  modal({
-    title: existing ? "Edit goal" : "New goal",
-    body,
-    actions
-  });
+  modal({ title: existing ? "Edit goal" : "New goal", body, actions });
 }
 
 function emptyState(title, sub) {
