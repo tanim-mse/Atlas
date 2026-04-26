@@ -1,5 +1,5 @@
 import { sb, insertOwned } from "./supabase-client.js";
-import { $, el, isoDate, lastNDays, prettyDate, toast, modal } from "./util.js";
+import { el, isoDate, lastNDays, prettyDate, toast, modal, REDUCED } from "./util.js";
 
 const PALETTE = ["#7c5cff","#2ad9ff","#3ddc97","#ffb35a","#ff5fa2","#a78bfa"];
 const ICONS = ["✦","◆","◉","❖","✧","△","◈","✿","☀","☾","⚘","✺"];
@@ -30,6 +30,10 @@ export async function renderHabits(root, user) {
   const grid = el("div", { class: "habits-grid" });
   habits.forEach(h => grid.appendChild(habitCard(h, logs, () => renderHabits(root, user))));
   root.appendChild(grid);
+
+  if (window.gsap && !REDUCED) {
+    gsap.from(grid.children, { y: 18, opacity: 0, duration: 0.7, stagger: 0.05, ease: "power3.out" });
+  }
 }
 
 function habitCard(habit, logs, refresh) {
@@ -42,7 +46,6 @@ function habitCard(habit, logs, refresh) {
 
   card.appendChild(el("h3", { class: "habit__name" }, habit.name));
 
-  // 7-day grid
   const week = el("div", { class: "habit__week" });
   lastNDays(7).forEach(d => {
     const iso = isoDate(d);
@@ -51,28 +54,30 @@ function habitCard(habit, logs, refresh) {
     const cell = el("button", {
       class: "habit__day" + (done ? " is-done" : "") + (isToday ? " is-today" : ""),
       title: prettyDate(d),
-      onClick: async () => {
+      onClick: async (e) => {
+        const btn = e.currentTarget;
+        btn.classList.add("just-checked");
         if (done) {
           await sb.from("habit_logs").delete().eq("habit_id", habit.id).eq("log_date", iso);
         } else {
           await insertOwned("habit_logs", { habit_id: habit.id, log_date: iso });
         }
-        refresh();
+        setTimeout(refresh, 180);
       }
     }, d.toLocaleDateString([], { weekday: "narrow" }));
     week.appendChild(cell);
   });
   card.appendChild(week);
 
-  // Footer: 30-day completion
   const in30 = logs.filter(l => l.habit_id === habit.id).length;
   const pct = Math.round((in30 / 30) * 100);
-  const foot = el("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "var(--mono)", color: "var(--ink-3)", letterSpacing: "0.1em" } });
+  const foot = el("div", {
+    style: { display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "var(--mono)", color: "var(--ink-3)", letterSpacing: "0.1em" }
+  });
   foot.appendChild(el("span", {}, `${in30}/30`));
   foot.appendChild(el("span", {}, `${pct}%`));
   card.appendChild(foot);
 
-  // Right-click / long-press to edit
   card.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     editHabitModal(habit, refresh);
@@ -85,7 +90,6 @@ function computeStreak(habitId, logs) {
   const myLogs = new Set(logs.filter(l => l.habit_id === habitId).map(l => l.log_date));
   let streak = 0;
   let d = new Date(); d.setHours(0,0,0,0);
-  // If not done today, streak anchors to yesterday
   if (!myLogs.has(isoDate(d))) d.setDate(d.getDate() - 1);
   while (myLogs.has(isoDate(d))) {
     streak++;
@@ -102,13 +106,11 @@ function addHabitModal(onSaved) {
   nameField.appendChild(name);
   body.appendChild(nameField);
 
-  // icon
   const iconWrap = el("div", { style: { display: "flex", flexWrap: "wrap", gap: "6px" } });
   let selectedIcon = "✦";
   ICONS.forEach(i => {
     const b = el("button", {
-      type: "button",
-      class: "chip",
+      type: "button", class: "chip",
       style: { fontSize: "16px", padding: "6px 10px", cursor: "pointer" },
       onClick: () => {
         selectedIcon = i;
@@ -124,16 +126,12 @@ function addHabitModal(onSaved) {
   iconField.appendChild(iconWrap);
   body.appendChild(iconField);
 
-  // color
   const colorWrap = el("div", { style: { display: "flex", gap: "8px" } });
   let selectedColor = PALETTE[0];
   PALETTE.forEach(c => {
     const b = el("button", {
       type: "button",
-      style: {
-        width: "26px", height: "26px", borderRadius: "7px",
-        background: c, border: "2px solid transparent", cursor: "pointer"
-      },
+      style: { width: "26px", height: "26px", borderRadius: "7px", background: c, border: "2px solid transparent", cursor: "pointer" },
       onClick: () => {
         selectedColor = c;
         colorWrap.querySelectorAll("button").forEach(x => x.style.borderColor = "transparent");
@@ -156,12 +154,8 @@ function addHabitModal(onSaved) {
       { label: "Cancel", onClick: (c) => c() },
       { label: "Create", variant: "btn--primary", onClick: async (close) => {
         if (!name.value.trim()) return;
-        await insertOwned("habits", {
-          name: name.value.trim(), icon: selectedIcon, color: selectedColor
-        });
-        close();
-        toast("Habit added");
-        onSaved();
+        await insertOwned("habits", { name: name.value.trim(), icon: selectedIcon, color: selectedColor });
+        close(); toast("Habit added"); onSaved();
       }}
     ]
   });
