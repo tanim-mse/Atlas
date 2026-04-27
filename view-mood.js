@@ -33,7 +33,7 @@ export async function renderMood(root, user) {
   root.appendChild(card);
 
   // Insight
-  const insight = el("div", { id: "mood-insight", class: "card card--lilac", style: { marginTop: "16px", padding: "20px 24px" } });
+  const insight = el("div", { id: "mood-insight", class: "card card--cyan", style: { marginTop: "16px", padding: "20px 24px" } });
   root.appendChild(insight);
 
   await draw(30);
@@ -66,7 +66,7 @@ async function draw(days) {
   stats.innerHTML = "";
   stats.appendChild(statBigCard("Avg mood", avgMood, "var(--grad-cosmic)", "card--violet", { decimals: 1 }));
   stats.appendChild(statBigCard("Avg energy", avgEnergy, "var(--grad-ocean)", "card--cyan", { decimals: 1 }));
-  stats.appendChild(statBigCard("Days logged", moods.length, "var(--grad-aurora)", "card--rose", { decimals: 0, suffix: `/${days}` }));
+  stats.appendChild(statBigCard("Days logged", moods.length, "var(--grad-aurora)", "card--jade", { decimals: 0, suffix: `/${days}` }));
 
   // Tickers
   requestAnimationFrame(() => {
@@ -140,8 +140,8 @@ function chart(days, total) {
 
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   defs.innerHTML = `
-    <linearGradient id="moodGrad" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#ff5fa2"/></linearGradient>
-    <linearGradient id="energyGrad" x1="0" x2="1"><stop offset="0%" stop-color="#2ad9ff"/><stop offset="100%" stop-color="#3ddc97"/></linearGradient>
+    <linearGradient id="moodGrad" x1="0" x2="1"><stop offset="0%" stop-color="#6c8cff"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+    <linearGradient id="energyGrad" x1="0" x2="1"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
   `;
   svg.appendChild(defs);
 
@@ -174,8 +174,8 @@ function chart(days, total) {
   // Stagger dots in
   let dotIdx = 0;
   days.forEach((d, i) => {
-    if (d.mood != null) { svg.appendChild(dot(xScale(i), yScale(d.mood), "#7c5cff", dotIdx++ * 22)); }
-    if (d.energy != null) { svg.appendChild(dot(xScale(i), yScale(d.energy), "#2ad9ff", dotIdx++ * 22)); }
+    if (d.mood != null) { svg.appendChild(dot(xScale(i), yScale(d.mood), "#6c8cff", dotIdx++ * 22)); }
+    if (d.energy != null) { svg.appendChild(dot(xScale(i), yScale(d.energy), "#34d399", dotIdx++ * 22)); }
   });
 
   const labelCount = Math.min(6, days.length);
@@ -192,9 +192,9 @@ function chart(days, total) {
 
   const leg = document.createElementNS("http://www.w3.org/2000/svg", "g");
   leg.innerHTML = `
-    <circle cx="${W - 180}" cy="${P - 18}" r="4" fill="#7c5cff"/>
+    <circle cx="${W - 180}" cy="${P - 18}" r="4" fill="#6c8cff"/>
     <text x="${W - 170}" y="${P - 14}" fill="#a8adc2">mood</text>
-    <circle cx="${W - 110}" cy="${P - 18}" r="4" fill="#2ad9ff"/>
+    <circle cx="${W - 110}" cy="${P - 18}" r="4" fill="#34d399"/>
     <text x="${W - 100}" y="${P - 14}" fill="#a8adc2">energy</text>
   `;
   svg.appendChild(leg);
