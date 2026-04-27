@@ -123,7 +123,7 @@ function journalCard(entry, slot) {
       class: "card__sub",
       style: { fontFamily: "var(--serif)", fontSize: "16px", lineHeight: "1.6", color: "var(--ink-2)", marginTop: "4px" }
     }, preview + ((entry.content || "").length > 220 ? "…" : "")));
-    const chips = el("div", { style: { display: "flex", gap: "8px", marginTop: "auto", paddingTop: "20px" } });
+    const chips = el("div", { style: { display: "flex", gap: "8px", marginTop: "auto", paddingTop: "20px", flexWrap: "wrap" } });
     if (entry.mood) chips.appendChild(el("span", { class: "chip" }, `mood ${entry.mood}`));
     if (entry.energy) chips.appendChild(el("span", { class: "chip" }, `energy ${entry.energy}`));
     chips.appendChild(el("span", { class: "chip", style: { color: "var(--a-violet)" } }, "Continue writing →"));
@@ -131,9 +131,9 @@ function journalCard(entry, slot) {
   } else {
     card.appendChild(el("h3", { class: "card__title", style: { fontSize: "30px" } }, "The page is waiting."));
     card.appendChild(el("p", { class: "card__sub", style: { marginTop: "10px", fontFamily: "var(--serif)", fontStyle: "italic", fontSize: "15px" } }, "Start with today."));
-    card.appendChild(el("div", { style: { marginTop: "auto", paddingTop: "20px" } },
-      el("span", { class: "chip", style: { color: "var(--a-violet)" } }, "Open editor →")
-    ));
+    const cta = el("div", { style: { marginTop: "auto", paddingTop: "20px", display: "flex" } });
+    cta.appendChild(el("span", { class: "chip", style: { color: "var(--a-violet)" } }, "Open editor →"));
+    card.appendChild(cta);
   }
   return card;
 }
@@ -156,9 +156,9 @@ function habitsCard(habits, logs, slot) {
   const C = 2 * Math.PI * 50;
   const target = C * (1 - pct);
   ring.innerHTML = `
-    <svg viewBox="0 0 120 120">
-      <circle class="ring__bg" cx="60" cy="60" r="50"/>
-      <circle class="ring__fg" cx="60" cy="60" r="50" style="--circ:${C}; --ring-target:${target}"/>
+    <svg viewBox="0 0 132 132">
+      <circle class="ring__bg" cx="66" cy="66" r="58"/>
+      <circle class="ring__fg" cx="66" cy="66" r="58" style="--circ:${2*Math.PI*58}; --ring-target:${(2*Math.PI*58)*(1-pct)}"/>
     </svg>
     <div class="ring__center">
       <div class="ring__value" data-tick="${doneToday}">${doneToday}</div>
@@ -176,7 +176,7 @@ function habitsCard(habits, logs, slot) {
 }
 
 function moodCard(entries, slot) {
-  const card = makeCard("card--lilac", "mood", slot);
+  const card = makeCard("card--cyan", "mood", slot);
   card.appendChild(cardHead("Mood · 30 days", ICON.mood));
   const vals = entries.filter(e => e.mood).map(e => e.mood);
   const avg = vals.length ? +(vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : 0;
@@ -187,7 +187,7 @@ function moodCard(entries, slot) {
     "data-decimals": "1"
   }, "0.0"));
   card.appendChild(el("div", { class: "card__sub" }, vals.length ? `avg across ${vals.length} entries` : "no data yet"));
-  if (vals.length > 1) card.appendChild(sparkline(entries.map(e => e.mood), 60, "spark1", ["#7c5cff","#ff5fa2"]));
+  if (vals.length > 1) card.appendChild(sparkline(entries.map(e => e.mood), 60, "spark1", ["#6c8cff","#22d3ee"]));
   return card;
 }
 
@@ -213,7 +213,7 @@ function financeCard(txs, slot) {
 }
 
 function healthCard(h, slot) {
-  const card = makeCard("card--rose", "health", slot);
+  const card = makeCard("card--jade", "health", slot);
   card.appendChild(cardHead("Health · today", ICON.health));
   if (!h) {
     card.appendChild(el("h3", { class: "card__title" }, "Untracked."));
@@ -233,7 +233,7 @@ function gamingCard(sessions, slot) {
   card.appendChild(cardHead("Gaming · this week", ICON.gaming));
   const mins = sessions.reduce((s, x) => s + (x.duration_minutes || 0), 0);
   const h = Math.floor(mins / 60), m = mins % 60;
-  card.appendChild(el("div", { class: "card__big", style: { "--card-grad": "var(--grad-ember)" } }, mins ? `${h}h ${m}m` : "0h"));
+  card.appendChild(el("div", { class: "card__big", style: { "--card-grad": "var(--grad-violet)" } }, mins ? `${h}h ${m}m` : "0h"));
   card.appendChild(el("div", { class: "card__sub" }, `${sessions.length} session${sessions.length !== 1 ? "s" : ""}`));
   return card;
 }
